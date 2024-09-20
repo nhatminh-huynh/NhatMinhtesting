@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAPTCHA Checkbox</title>
+<style>
+    html, body {
+        height: 56.2vw;
+    }
+    
+    body {
+      margin: 0;
+      justify-content: center;
+      align-items: center;
+      background: url(img/bg_frontpage.png);
+      background-position: center;
+      background-size:cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    .captcha-box {
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      padding-left: 2vw;
+      padding-right: 2vw;
+
+      width:30vw;
+      height:10vw;
+
+      position: relative; 
+      left: 50%;
+      transform: translateX(-50%);
+
+      top: 30%;
+      background-color: rgb(231, 231, 231);
+    }
+    .captcha-checkbox {
+      margin-right: 20px;
+
+      width:5vw;
+      height:5vw;
+    }
+#captchaText {
+      font-size: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="captcha-box">
+    <input type="checkbox" class="captcha-checkbox" id="robotCheck">
+    <span id="captchaText">I'm not a </span>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script>
+
+    let nameWords = ["robot", "machine", "AI","algorithm","cyborg","bot","system","device","controller","gear"];
+    let currentWordIndex = 0;
+    let captchaText;
+    let intervalId = null;
+
+    function setup() {
+      noCanvas(); // We don't need a canvas in this case
+      captchaText = select('#captchaText'); // Select the HTML element where text will be updated
+      updateCaptchaText(); // Initialize text
+    }
+
+    function keyPressed() {
+      if (key === ' ') { // Check if the Space key is pressed
+        if (intervalId === null) { // Start cycling only if not already started
+          intervalId = setInterval(updateCaptchaText, 200); // Update every second (1000 ms)
+        }
+      }
+    }
+
+    function updateCaptchaText() {
+      captchaText.html("I'm not a " + nameWords[currentWordIndex]);
+      currentWordIndex = (currentWordIndex + 1) % nameWords.length; // Cycle through the array
+
+    if (currentWordIndex === 0) {
+        clearInterval(intervalId); // Stop the interval
+        intervalId = null; // Reset the interval ID
+      }
+    }
+
+    // Handle checkbox change event
+    document.getElementById('robotCheck').addEventListener('change', function() {
+      if (this.checked) {
+        window.location.href = "end.html"; 
+      }
+    });
+  </script>
+</body>
+</html>

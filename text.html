@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distorted CAPTCHA with CSS</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
+
+    <style>
+    html, body {
+       height: 56.2vw;
+    }
+@font-face {
+  font-family: captchaFont;
+  src: url(font/PositionsByArixbored-Regular\ .otf);
+}
+@font-face {
+  font-family: myFirstFont;
+  src: url(font/fonnts.com-Corundum-Text-Book-.otf);
+}
+    body {
+       margin: 0;
+       justify-content: center;
+       align-items: center;
+       background: linear-gradient(0deg, rgba(209,209,209,1) 0%, rgb(248, 248, 248) 100%);
+       overflow: hidden;
+    }
+    .box{
+       position: absolute; 
+       display: flex;
+       flex-direction: column;
+       width: 300px;
+
+       right: 5%;
+       top: 50%;
+       transform: translateY(-50%);
+
+       border: 1px solid black;
+       /*border-radius: 2vw;*/
+       padding-top:3vw;
+       padding-bottom:3vw;
+
+       padding-left:4vw;
+       padding-right:4vw;
+
+       background-image: url(img/bg_box1.png);
+       background-size: cover;
+       background-repeat: no-repeat;
+      
+    }
+
+
+      .distorted-text {
+        font-size: 70px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        letter-spacing: 2px;
+        text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
+
+      }
+
+      .distorted-text span {
+        color: rgb(255, 0, 255);
+        font-family:captchaFont;
+        /*font-family:myFirstFont;*/
+
+        display: inline-block;
+        transition: transform 0.3s ease; /* Smooth animation */
+        mix-blend-mode:exclusion;
+
+      }
+      .distorted-text span:hover {
+        transform: rotate(calc(var(--rotation) * 0deg)) scale(1.2), calc(var(--scaleY)), skewX(calc(var(--skewX) * 1deg));
+        mix-blend-mode:normal;
+
+      }
+
+      .distorted-text span {
+        transform: rotate(calc(var(--rotation) * 1deg)) scale(calc(var(--scaleX)), calc(var(--scaleY))) skewX(calc(var(--skewX) * 1deg));
+      }
+
+      .input-container {
+          display: flex;
+          justify-content: center;
+          margin-top: 2vw;
+      }
+
+      input {
+          padding: 10px;
+          font-size: 16px;
+          flex: 1;
+          margin-right: 10px;
+
+          border-radius: 50px;
+          border: black solid 1px;
+
+          background: linear-gradient(0deg, rgba(244,244,244,1) 0%, rgb(197, 197, 197) 50%, rgba(244,244,244,1) 100%);
+        }
+
+button {
+    padding: 10px 20px;
+    font-size: 20px;
+    font-family:Arial, Helvetica, sans-serif;
+          
+    border: 1px rgb(0, 47, 255) solid;
+    border-radius: 50px;
+    cursor: pointer;
+
+    display: inline-block;
+    position: relative;
+    background-color: #0051ff;
+    background-image: linear-gradient( /* chrome */
+    hsla(0, 0%, 100%, 0.6), hsla(0, 0%, 100%, 0) 50%,
+    hsla(175, 100%, 50%, 0.349) 50%, hsla(187, 100%, 50%, 0.2) );
+    
+    box-shadow:
+    inset 0 -5px 20px hsl(180, 100%, 50%), /* top light */
+    inset 0 5px 20px hsla(0, 0%, 100%, 0.644), /* bottom shadow */
+    /* multiple light sources yall */
+    0px 7px 7px hsla(0, 0%, 51%, 0.356); /* drop shadow 2 */
+}
+
+button:before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 3px;
+    height: 20px;
+    border-radius: 50px;
+    background: linear-gradient(hsla(0, 0%, 100%, 0.87), hsla(0, 0%, 100%, 0) );
+}
+button:hover {
+    scale:1.05;
+}
+
+#resultMessage {
+    text-align: center;
+    position:absolute;
+    left: 0; 
+    right: 0; 
+    bottom:0.5vw;
+    font-size: 18px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    color: red; /* Change color to indicate the result message */
+}
+
+#humanquarium{
+  width: auto;
+  height:100%;
+  position: absolute;
+  z-index: 0;
+
+  left: 0;
+  top: 0;
+
+}
+#rectangle{
+  width: auto;
+  height:100%;
+  position: absolute;
+  z-index: -4;
+
+  left: 0;
+  top: 0;
+
+}
+.netart{
+  
+  display: grid;
+  grid-auto-columns: max-content;
+  grid-auto-flow:dense;
+    
+  grid-template-columns:repeat(1, 20vw); 
+  grid-template-rows: repeat(1, 10vw);
+  
+  position: absolute;
+  z-index: 2;
+
+  align-items: center;
+  justify-content: center;
+
+  height:100%;
+  width:50%;
+
+  top:0;
+
+}
+
+#map{
+  width:auto;
+  height:16%;
+  position: absolute;
+  
+  left: 45%;
+  top: 70%;
+
+  cursor: pointer;
+  transition: 1s ease-in-out;
+}
+
+.square {
+  width: 6px;
+  height: 6px;
+  background-color: red;
+  position: absolute;
+  transition: 0.5s ease-in-out;
+}
+.square-container {
+  position: absolute;
+  width: 56.2vw; 
+  height: 56.2vw;
+  top:0;
+  left:2vw;
+  overflow: hidden;
+  display: flex;
+  z-index: 1;
+}
+
+.bar-word{
+  display: flex;
+  width: 15%;
+  height: auto;
+  position: absolute;
+  right: 2vw;
+  top: 4vw;
+
+  justify-content: center;
+  align-items: center;
+}
+#bar{
+  width: 100%;
+  height: auto;
+  position: absolute;
+  
+  z-index: 3;
+  opacity:1;
+}
+#key{
+  color:white;
+  font-weight: lighter;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.3vw;
+  position: absolute;
+  
+  z-index: 2;
+  
+}
+#barred{
+  width: 100%;
+  height: auto;
+  position: absolute;
+  z-index: 1;
+}
+
+#bar:hover{
+  opacity:0;
+  transition: 0.5s ease-in-out;
+}
+
+#button_white{
+  width: 15%;
+  height: auto;
+  position: absolute;
+  right: 1vw;
+  bottom: 1vw;
+  z-index: 2;
+  opacity:1;
+}
+#button_white:hover{
+  opacity:0;
+  transition: 0.5s ease;
+}
+
+#button_red{
+  width: 15%;
+  height: auto;
+  position: absolute;
+  right: 1vw;
+  bottom: 1vw;
+  z-index: 1;
+}
+</style>
+
+
+</head>
+<body>
+<div class="box">
+  <div class="distorted-text" id="captcha">
+</div>
+
+<div class="input-container">
+    <input type="text" id="userInput" placeholder="Enter CAPTCHA here">
+    <button id="submitButton">Submit</button>  
+    <div id="resultMessage"></div>
+
+  </div>
+</div>
+
+<div id="squareContainer" class="square-container"></div>
+<div class="netart">
+  <img src="img/map.png" id="map">
+  <!--img src="img/lightbolt.png" id="light"-->
+</div>
+
+  <img src="img/page2.png" id="humanquarium">
+  <img src="img/Rectangle 2.png" id="rectangle">
+
+
+  <div id="squareContainer"></div>
+
+<script> 
+
+
+// Array of CAPTCHA words
+let captchaCode = '';
+let captchaWords = ["hellothere", "howareyou", "imfine", "goodby3"];
+let currentIndex = 0;
+let squares = [];
+    
+let particles = [];
+
+class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = random(-1, 1);
+        this.vy = random(-1, 1);
+        this.size = random(2, 5);
+        this.alpha = 255;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Boundaries
+        if (this.x < 0 || this.x > width) this.vx *= -2;
+        if (this.y < 0 || this.y > height) this.vy *= -2;
+
+        // Gradually fade out particles
+        this.alpha -= 1.5;
+      }
+
+      display() {
+        noStroke();
+        fill(255, 0, 0, this.alpha);
+        rect(this.x, this.y, this.size+2);
+      }
+
+      isDead() {
+        return this.alpha <= 0;
+      }
+    }
+
+    function setup() {
+      canvas=createCanvas(w, h);
+      canvas.position(0, 0);  // Make canvas full-screen
+      canvas.style('z-index', '-1'); 
+
+      randomizeTextPositions();
+
+      const str = 'I am not a robot';
+      const wordsStr = str.split(' ');
+
+      const container = select('#text-container'); // Select the container
+
+      let x = 20;
+      let y = 0;
+
+      // Iterate over each word
+      for (let i = 0; i < wordsStr.length; i++) {
+        const wordStr = wordsStr[i]; // Get current word
+        const wordSpan = createSpan(wordStr + ' '); // Create a span element for each word
+    
+        wordSpan.class('word'); // Apply the CSS class
+
+        if (wordStr === 'not') {
+          wordSpan.class('italic'); // Apply the italic class
+        }
+        
+        wordSpan.parent(container); // Attach span to the container
+
+        words.push(wordSpan); // Store span in array
+
+        // Store original position
+        originalPositions.push({span: wordSpan, x: x, y: y});
+
+        const wordWidth = wordSpan.elt.offsetWidth; // Use offsetWidth for accurate width
+        const containerWidth = container.elt.clientWidth; // Container width
+
+        if (x + wordWidth > containerWidth) {
+          x = 20; // Reset x position
+          y += wordSpan.elt.offsetHeight; // Move to next line
+        }
+        
+        wordSpan.style('transform', `translate(${x}px, ${y}px)`); // Set position using transform
+        x += wordWidth + 10; // Update x position for next word
+      }
+
+      for (let i = 0; i < 100; i++) {
+        particles.push(new Particle(random(width), random(height)));
+      }
+    
+  }
+  
+function setup() {
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.style('position', 'absolute').style('top', '0').style('left', '0').style('pointer-events', 'none');
+  
+  captchaCode = getRandomWord(); // Get the word before incrementing index
+  console.log("Captcha Code:", captchaCode); // Debugging line to check the word
+
+  createDistortedText(captchaCode);
+
+  canvas.parent(document.body);
+}
+
+function draw(){
+    clear();
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].display();
+
+        if (particles[i].isDead()) {
+          particles.splice(i, 1);
+        }
+      }
+
+      // Generate particles around the mouse
+      if (frameCount % 5 === 0) {
+        for (let i = 0; i < 5; i++) {
+          particles.push(new Particle(mouseX, mouseY));
+        }
+      }
+    }
+
+    
+// Function to get a random word
+function getRandomWord() {
+  const word = captchaWords[currentIndex];
+  console.log("Current Index before retrieval:", currentIndex); // Debugging line
+  return word;
+}
+
+// Use a separate function to manage index incrementation
+function nextWord() {
+  currentIndex = (currentIndex + 1) % captchaWords.length; // Move to the next word, loop back to start
+  console.log("Current Index after incrementing:", currentIndex); // Debugging line
+}
+
+// Function to create distorted text
+function createDistortedText(text) {
+  let captchaElement = document.getElementById('captcha');
+  captchaElement.innerHTML = ''; // Clear the old content
+
+  function updateScales(event) {
+    let mouseX = event.clientX;
+    let mouseY = event.clientY;
+
+    let scaleX = (mouseX / window.innerWidth) * 1 + 1.5; // Range: -10 to 10
+    let scaleY = (mouseY / window.innerHeight) * 1 + 1.1;
+    let rotation = (mouseX / window.innerHeight) * 20 ; // Range: -5 to 5
+
+    // Update the styles of all spans
+    Array.from(captchaElement.children).forEach(span => {
+      span.style.setProperty('--scaleX', scaleX.toFixed(2)); // Apply mouse influence
+      span.style.setProperty('--scaleY', scaleY.toFixed(2)); // Apply mouse influence
+    });
+  }
+  
+  document.removeEventListener('mousemove', updateScales); // Remove old listener if it exists
+  document.addEventListener('mousemove', updateScales);
+
+    for (let char of text) {
+      let span = document.createElement('span');
+      span.innerText = char;
+
+    // Random distortions
+    const rotation = Math.floor(Math.random() * 25 -5); // Random rotation between -10 and 10 degrees
+    const scaleX = (Math.random() * 0.5 + 0.75).toFixed(2); // Initial random scale between 0.75 and 1.25
+    const scaleY = (Math.random() * 0.5 + 0.75).toFixed(2); // Initial random scale between 0.75 and 1.25
+    const skewX = Math.floor(Math.random() * 20 - 5); // Random skew between -5 and 5 degrees
+
+    span.style.setProperty('--rotation', rotation);
+    span.style.setProperty('--scaleX', scaleX); // Apply initial random scale
+    span.style.setProperty('--scaleY', scaleY); // Apply initial random scale
+    span.style.setProperty('--skewX', skewX);
+
+    captchaElement.appendChild(span);
+  }
+
+}
+
+
+// Function to check the user's input
+let currentBackgroundIndex = 0;
+const backgrounds = [
+    'url(img/bg_box4.png)',
+    'url(img/bg_box2.png)',
+    'url(img/bg_box3.png)' // Add as many backgrounds as you need
+];
+
+
+    function checkCaptchaAnswer() {
+      const userInput = document.getElementById('userInput').value.trim().toUpperCase(); // Convert input to uppercase and trim spaces
+      const resultMessage = document.getElementById('resultMessage');
+      const box = document.querySelector('.box');
+
+
+      if (userInput === captchaCode.toUpperCase()) { // Ensure CAPTCHA code is in uppercase for comparison
+
+        if (currentIndex === captchaWords.length - 1) {
+            window.location.href = 'image.html'; 
+        
+          } else {
+
+            nextWord();
+            captchaCode = getRandomWord(); 
+            createDistortedText(captchaCode);
+            resultMessage.innerText = "Correct! You are human now";
+            resultMessage.style.color = "#7CFC00";
+
+            document.getElementById('userInput').value = '';
+            
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.length;
+            box.style.backgroundImage = backgrounds[currentBackgroundIndex];
+        }
+
+      } else {
+        // If wrong, show error message
+        resultMessage.innerText = "HEY ROBOT!";
+        resultMessage.style.color = "red";
+
+        boxElement.classList.remove('background1', 'background2'); // Remove previous backgrounds
+        boxElement.classList.add('background2');
+      }
+    }
+  
+    // Generate and display the initial distorted CAPTCHA text
+    createDistortedText(captchaCode);
+  
+    // Bind the submit button to check the answer
+    document.getElementById('submitButton').addEventListener('click', checkCaptchaAnswer);
+ 
+    
+
+//------------------SQUARES------------------------
+let numberOfSquares = 20;
+let engine = Matter.Engine.create();
+engine.world.gravity.x = 0;
+engine.world.gravity.y = 0;
+let world = engine.world;
+let bodies = [];
+
+// Set up the world boundaries (walls)
+let ground = Matter.Bodies.rectangle(window.innerWidth / 2, window.innerHeight, window.innerWidth, 50, { isStatic: true });
+let leftWall = Matter.Bodies.rectangle(0, window.innerHeight / 2, 50, window.innerHeight, { isStatic: true });
+let rightWall = Matter.Bodies.rectangle(window.innerWidth, window.innerHeight / 2, 50, window.innerHeight, { isStatic: true });
+let ceiling = Matter.Bodies.rectangle(window.innerWidth / 2, 0, window.innerWidth, 50, { isStatic: true });
+Matter.World.add(world, [ground, leftWall, rightWall, ceiling]);
+
+// Function to get random positions for squares
+function getRandomPosition(element, size) {
+    const containerRect = element.getBoundingClientRect();
+    return {
+        x: Math.random() * (containerRect.width - size),
+        y: Math.random() * (containerRect.height - size)
+    };
+}
+
+
+
+// Function to randomize the position of the map and squares
+function randomizePositions() {
+    // Randomize the position of the #map within .netart
+    const map = document.getElementById('map');
+    const mapWidth = map.offsetWidth;
+    const mapHeight = map.offsetHeight;
+    const netartContainer = document.querySelector('.netart');
+    const containerRect = netartContainer.getBoundingClientRect();
+    
+    // Ensure the map stays within the container
+    map.style.left = `${Math.random() * (containerRect.width - mapWidth)}px`;
+    map.style.top = `${Math.random() * (containerRect.height - mapHeight)}px`;
+
+    // Clear and regenerate squares in the square-container
+    const squares = document.querySelectorAll('.square');
+    squares.forEach(square => square.remove()); // Remove existing squares
+    generateSquares(); // Generate new squares
+}
+
+// Function to create and append squares to the container
+function generateSquares() {
+    const squareSize = 50;
+    const container = document.getElementById('squareContainer'); // Use specific container
+
+    for (let i = 0; i < numberOfSquares; i++) {
+        const square = document.createElement('div');
+        square.classList.add('square');
+        const position = getRandomPosition(container, squareSize);
+        square.style.left = `${position.x}px`;
+        square.style.top = `${position.y}px`;
+        container.appendChild(square);
+
+
+        // Add physics body to the square with restitution for bouncing
+        let body = Matter.Bodies.rectangle(position.x + squareSize / 2, position.y + squareSize / 2, squareSize, squareSize, {
+            restitution: 1.0, // Max bounce factor
+            friction: 0,    // Very low friction to prevent sticking
+            frictionAir: 0  // Very low air resistance for continuous movement
+        });
+
+        Matter.Body.setVelocity(body, {
+            x: (Math.random() - 0.5) * 5, // Vận tốc ngang ngẫu nhiên
+            y: (Math.random() - 0.5) * 5  // Vận tốc dọc ngẫu nhiên
+        });
+
+        Matter.World.add(world, body);
+        bodies.push({ element: square, body });
+    }
+}
+
+// Generate squares when the page loads
+generateSquares();
+
+// Add click event listener to the map
+document.getElementById('map').addEventListener('click', () => {
+  numberOfSquares++;
+  randomizePositions(); // Randomize positions of #map and squares
+});
+
+// Update function to sync physics engine with DOM
+function updatePhysics() {
+    Matter.Engine.update(engine);
+
+    bodies.forEach(({ element, body }) => {
+        element.style.left = `${body.position.x - 25}px`; // Offset for square center
+        element.style.top = `${body.position.y - 25}px`;
+        element.style.transform = `rotate(${body.angle}rad)`; // Rotate square as it moves
+    });
+
+    requestAnimationFrame(updatePhysics);
+}
+
+// Call updatePhysics to start the physics simulation
+updatePhysics();
+</script>
+
+
+
+<div class="bar-word">
+  <img src="img/bar.png" id="bar">
+  <h1 id="key">Key Board</h1>
+  <img src="img/bar-red.png" id="barred">
+</div>
+
+<!--div>
+  <a href="image.html"><img src="img/button.png" id="button_white"></a>
+  <img src="img/button-red.png" id="button_red">
+</div-->
+
+
+
+</body>
+</html>

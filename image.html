@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <!--script src="sketch.js" defer></script-->
+    <title>Image CAPTCHA</title>
+    <style>
+html, body {
+    height: 56.2vw;
+}
+
+body {
+    margin: 0;
+    justify-content: center;
+    align-items: center;
+    /*background: url(img/bg_frontpage.png);
+  background-position: center;
+  background-size:cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;*/
+  background: linear-gradient(0deg, rgba(209,209,209,1) 0%, rgb(248, 248, 248) 100%);
+
+
+  overflow: hidden;
+
+   }
+.all{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+
+    height:90%;
+    width:35%;
+    padding:2vw;
+    left:2vw;
+    background: url(img/bg_frontpage.png);
+    background-position: center;
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    border-radius: 1vw;
+    display: grid;
+    grid-template-columns: repeat(1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1vw;
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+h1{
+    font-family: myFirstFont;
+    font-size: 2vw;
+    position: relative;
+
+    text-align: center;
+
+    margin-block-start: 0;
+    margin-block-end: 0;
+
+}
+.highlight{
+    font-family: myFirstFont;
+    font-style: italic;  
+}
+.highlight:hover{
+    font-family: myFirstFont;
+    color:red;
+    font-style: italic; 
+    transition: 0.2s ease-in-out; 
+
+    text-decoration: underline;
+
+}
+#resultMessage{
+    text-align: center;
+    justify-content: center;
+}
+
+        #captcha-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.1vw;
+            width: 35vw;
+            height: 35vw;
+
+        
+        }
+        .image-cell {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .image-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.2s ease;
+        }
+        .image-cell.selected img {
+            border: 2px solid rgb(0, 0, 0);
+            width: 100%;
+            height: 100%;
+        }
+        .image-cell.correct img {
+            border: 2px solid #51ff00;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-cell.incorrect img {
+            border: 2px solid red;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .result{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width:100%;
+            
+            align-items: center;
+        }
+
+#restartButton {
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    font-family:Arial, Helvetica, sans-serif;
+
+    color: white;
+          
+    border: 1px rgb(255, 0, 0) solid;
+    border-radius: 50px;
+    cursor: pointer;
+
+    display: inline-block;
+    position: relative;
+    background-color: #af0000;
+    background-image: linear-gradient( /* chrome */
+    hsl(0, 0%, 100%), hsla(0, 100%, 39%, 0.151) 50%,
+    hsla(0, 100%, 50%, 0.349) 50%, hsl(0, 100%, 50%) );
+    
+    box-shadow:
+    inset 0 -5px 20px hsl(0, 100%, 50%), /* top light */
+    inset 0 5px 20px hsla(0, 0%, 100%, 0.644); /* bottom shadow */
+    
+    justify-content: left;
+    transform:scale(0.8);
+
+}
+#restartButton:before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 3px;
+    height: 20px;
+    border-radius: 50px;
+    background: linear-gradient(hsla(0, 0%, 100%, 0.822), hsla(0, 14%, 50%, 0) );
+
+    transform:scale(0.8);
+
+}
+#restartButton:hover{
+    transform:scale(1);
+}
+
+#submitButton {
+    padding: 10px 20px;
+    font-size: 20px;
+    font-family:Arial, Helvetica, sans-serif;
+          
+    border: 1px rgb(0, 47, 255) solid;
+    border-radius: 50px;
+    cursor: pointer;
+
+    display: inline-block;
+    position: relative;
+    background-color: #0051ff;
+    background-image: linear-gradient( /* chrome */
+    hsla(0, 0%, 100%, 0.6), hsla(0, 0%, 100%, 0) 50%,
+    hsla(175, 100%, 50%, 0.349) 50%, hsla(187, 100%, 50%, 0.2) );
+    
+    box-shadow:
+    inset 0 -5px 20px hsl(180, 100%, 50%), /* top light */
+    inset 0 5px 20px hsla(0, 0%, 100%, 0.644); /* bottom shadow */
+
+    transform:scale(0.8);
+
+}
+
+#submitButton:before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 3px;
+    height: 20px;
+    border-radius: 50px;
+    background: linear-gradient(hsla(0, 0%, 100%, 0.87), hsla(0, 0%, 100%, 0) );
+
+    transform:scale(0.8);
+
+}
+#submitButton:hover {
+    transform:scale(1);
+}
+
+#button_white{
+  width: 15%;
+  height: auto;
+  position: absolute;
+  right: 1vw;
+  bottom: 1vw;
+  z-index: 2;
+  opacity:1;
+}
+#button_white:hover{
+  opacity:0;
+  transition: 0.5s ease;
+}
+
+#button_red{
+  width: 15%;
+  height: auto;
+  position: absolute;
+  right: 1vw;
+  bottom: 1vw;
+  z-index: 1;
+}
+
+#mouse{
+  width: auto;
+  height:100%;
+  position: absolute;
+  z-index: -3;
+
+  right: 0;
+  top: 0;
+  bottom:0;
+
+}
+
+#fish{
+  width: auto;
+  height:56.2vw;
+  position: absolute;
+  z-index: 2;
+
+  right: 0;
+  top: 0;
+
+}
+
+</style>
+
+</head>
+<body>
+<div class="all">
+    <h1 id="captchaTitle"></h1>
+    <div id="captcha-container"></div>
+    <div class="result">
+      <button id="submitButton">Submit</button>
+      <div id="resultMessage"></div>
+      <button id="restartButton">↻</button>
+    </div>
+</div>
+
+<img src="img/MOUSE.png" id="mouse">
+
+
+<!--canvas id="myCanvas"></canvas-->
+
+<script>
+let img;
+
+function preload() {
+    img = loadImage("img/map.png");
+}
+
+function setup() {
+  createCanvas(1100, 1080);
+  imgX = width / 2; // Start image in the center
+  imgY = height / 2;
+
+  loadCategory(currentCategoryIndex);
+  document.getElementById('submitButton').addEventListener('click', checkAnswer);
+  document.getElementById('restartButton').addEventListener('click', restartCategory);
+    
+    
+   /* let canvas = createCanvas(windowWidth, windowHeight);
+   canvas.id('myCanvas');*/
+}
+
+function draw() {
+    background(255);
+    clear();
+    image(img, imgX+100, 100);
+
+  let x1 = random(width);
+  let y1 = random(height);
+  let x2 = round(x1 + random(-10, 10));
+  let y2 = round(y1 + random(-10, 10));
+
+  set(x2, y2, get(x1, y1, 30, 30)); // x,y,obj
+  updatePixels();
+} 
+
+
+//----------IMAGE--SELECTION------------
+
+    // Function to load images for the selected category
+    function loadCategory(index) {
+        const category = categories[index];
+        const highlightedTitle = category.title
+        .replace('human', '<span class="highlight">human</span>')
+        .replace('computer', '<span class="highlight">computer</span>');
+
+        document.getElementById('captchaTitle').innerHTML = highlightedTitle;        const container = document.getElementById('captcha-container');
+        container.innerHTML = ''; // Clear existing images
+        
+        category.images.forEach((path, imgIndex) => {
+            const div = document.createElement('div');
+            div.classList.add('image-cell');
+            div.dataset.index = imgIndex;
+            
+            const img = document.createElement('img');
+            img.src = path;
+            img.onload = () => console.log(`Loaded image: ${path}`); // Log successful image loading
+            img.onerror = () => console.error(`Failed to load image: ${path}`); // Log failed image loading
+            
+            div.appendChild(img);
+            container.appendChild(div);
+            
+            div.addEventListener('click', () => toggleSelection(div));
+        });
+
+        selectedImages.clear(); // Clear selected images for the new category
+        document.getElementById('resultMessage').innerText = ''; // Clear result message
+        document.getElementById('restartButton').style.display = 'none'; // Hide restart button
+    }
+
+    // Function to toggle the selection of images
+    function toggleSelection(cell) {
+        const index = cell.dataset.index;
+
+        if (selectedImages.has(index)) {
+            selectedImages.delete(index);
+            cell.classList.remove('selected');
+        } else {
+            selectedImages.add(index);
+            cell.classList.add('selected');
+        }
+    }
+
+    // Function to check the selected images against the correct answers
+    function checkAnswer() {
+        const category = categories[currentCategoryIndex];
+        const cells = document.querySelectorAll('.image-cell');
+        const selectedNumbers = new Set([...selectedImages].map(Number));
+
+        cells.forEach(cell => cell.classList.remove('correct', 'incorrect'));
+
+        cells.forEach(cell => {
+            const index = Number(cell.dataset.index);
+            if (category.correctAnswer.has(index)) {
+                cell.classList.add('correct');
+            } else {
+                cell.classList.add('incorrect');
+            }
+        });
+
+        if (JSON.stringify([...selectedNumbers].sort()) === JSON.stringify([...category.correctAnswer].sort())) {
+            document.getElementById('resultMessage').innerText = 'Correct! Well done.';
+            document.getElementById('resultMessage').style.color = '#51ff00';
+            document.getElementById('resultMessage').style.fontFamily = 'Arial';
+            document.getElementById('resultMessage').style.fontSize= '20px'
+            document.getElementById('resultMessage').style.fontStyle= 'italic'
+
+            currentCategoryIndex = (currentCategoryIndex + 1) % categories.length;
+            setTimeout(() => loadCategory(currentCategoryIndex), 2000);
+        } else {
+            document.getElementById('resultMessage').innerText = 'Try again!';
+            document.getElementById('resultMessage').style.color = 'red';
+            document.getElementById('resultMessage').style.fontFamily = 'Arial';
+            document.getElementById('resultMessage').style.fontSize= '20px'
+            document.getElementById('resultMessage').style.fontStyle= 'italic'
+
+
+            document.getElementById('restartButton').style.display = 'inline-block';
+        }
+    }
+
+    // Function to restart the category
+    function restartCategory() {
+        loadCategory(currentCategoryIndex);
+    }
+
+    // Categories and current index
+    const categories = [
+            {
+                title: 'Which one is human',
+                images: [
+                    'img/dog1.jpg', 'img/dog2.jpg', 'img/dog3.jpg',
+                    'img/cat1.jpg', 'img/cat2.jpg', 'img/dog4.jpg',
+                    'img/cat3.jpg', 'img/dog5.jpg', 'img/cat4.jpg'
+                ],
+                correctAnswer: new Set([0, 1, 2, 5, 7])
+            },
+            {
+                title: 'Which one is computer',
+                images: [
+                    'img/cat1.jpg', 'img/cat2.jpg', 'img/cat3.jpg',
+                    'img/dog1.jpg', 'img/dog2.jpg', 'img/dog3.jpg',
+                    'img/dog4.jpg', 'img/dog5.jpg', 'img/cat5.jpg'
+                ],
+                correctAnswer: new Set([0, 1, 2, 8])
+            },
+            {
+                title: 'Choose rat images',
+                images: [
+                    'img/cat4.jpg', 'img/rat2.jpg', 'img/dog3.jpg',
+                    'img/rat1.jpg', 'img/dog1.jpg', 'img/rat3.jpg',
+                    'img/rat4.jpg', 'img/cat5.jpg', 'img/dog4.jpg'
+                ],
+                correctAnswer: new Set([1, 3, 5, 6])
+            }
+    ];
+    let currentCategoryIndex = 0;
+    let selectedImages = new Set();
+
+    setup();
+//--------------------------------
+
+
+/*function draw() {
+    clear();
+    for (var i =0; i<30; i++){
+    for (var j =0; j<30; j++){
+      
+      var x = map(i, 0, 29, 50, 750);
+      var y = map(j, 0, 29, 50, 750);
+      
+      
+      var dis = dist(x,y, mouseX, mouseY);
+      var pct = map(dis, 0,100, 1,0, true);
+      
+      let cir = createVector(x,y);
+      let mouse = createVector(mouseX,mouseY);
+      let diff = p5.Vector.sub(cir, mouse);
+      diff.normalize();
+      //cir = cir+diff*pct*50;
+      cir = p5.Vector.add(cir, p5.Vector.mult(diff, pct*50));
+      
+      
+      circle(cir.x,cir.y, 5+8*pct);
+    }
+  }
+  
+}
+function windowResized() {
+    // Adjust canvas size when the window is resized
+    resizeCanvas(windowWidth, windowHeight);
+}*/
+</script>
+</body>
+</html>

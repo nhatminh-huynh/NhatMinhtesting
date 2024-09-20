@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>A3</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+  <div id="text-container"></div>
+  <script>
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+
+    let words = []; // Store word elements
+    let originalPositions = []; // Store original positions of words
+    let isFullscreen = false;
+    let showText = false;
+    let showText1 = false; 
+    let showText2 = false;
+
+    let alpha = 0;
+    let fading = false;
+    let fadeDuration = 500; // Duration of the fade-in effect in milliseconds
+    let fadeStartTime = 0;
+    let alphaDirection = 1; 
+    
+
+    let x1, y1, x2, y2, x3, y3;
+    let prevX1, prevY1, prevX2, prevY2, prevX3, prevY3;
+    let transitionSpeed = 0.05;
+    let moveToPosition = false;
+
+    let particles = [];
+
+    // Particle
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = random(-1, 1);
+        this.vy = random(-1, 1);
+        this.size = random(2, 5);
+        this.alpha = 255;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Boundaries
+        if (this.x < 0 || this.x > width) this.vx *= -2;
+        if (this.y < 0 || this.y > height) this.vy *= -2;
+
+        // Gradually fade out particles
+        this.alpha -= 1.5;
+      }
+
+      display() {
+        noStroke();
+        fill(255, 0, 0, this.alpha);
+        rect(this.x, this.y, this.size+2);
+      }
+
+      isDead() {
+        return this.alpha <= 0;
+      }
+    }
+
+    function setup() {
+      canvas=createCanvas(w, h);
+      canvas.position(0, 0);  // Make canvas full-screen
+      canvas.style('z-index', '-1'); 
+
+      randomizeTextPositions();
+
+      const str = 'I am not a robot';
+      const wordsStr = str.split(' ');
+
+      const container = select('#text-container'); // Select the container
+
+      let x = 20;
+      let y = 0;
+
+      // Iterate over each word
+      for (let i = 0; i < wordsStr.length; i++) {
+        const wordStr = wordsStr[i]; // Get current word
+        const wordSpan = createSpan(wordStr + ' '); // Create a span element for each word
+    
+        wordSpan.class('word'); // Apply the CSS class
+
+        if (wordStr === 'not') {
+          wordSpan.class('italic'); // Apply the italic class
+        }
+        
+        wordSpan.parent(container); // Attach span to the container
+
+        words.push(wordSpan); // Store span in array
+
+        // Store original position
+        originalPositions.push({span: wordSpan, x: x, y: y});
+
+        const wordWidth = wordSpan.elt.offsetWidth; // Use offsetWidth for accurate width
+        const containerWidth = container.elt.clientWidth; // Container width
+
+        if (x + wordWidth > containerWidth) {
+          x = 20; // Reset x position
+          y += wordSpan.elt.offsetHeight; // Move to next line
+        }
+        
+        wordSpan.style('transform', `translate(${x}px, ${y}px)`); // Set position using transform
+        x += wordWidth + 10; // Update x position for next word
+      }
+
+      for (let i = 0; i < 100; i++) {
+        particles.push(new Particle(random(width), random(height)));
+      }
+    
+  }
+
+function startFadingIn() {
+  fading = true;
+  alphaDirection = 1; // Set to 1 for fade-in
+  fadeStartTime = millis(); // Record the start time
+}
+
+  function draw(){
+    clear();
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].display();
+
+        if (particles[i].isDead()) {
+          particles.splice(i, 1);
+        }
+      }
+
+      // Generate particles around the mouse
+      if (frameCount % 5 === 0) {
+        for (let i = 0; i < 5; i++) {
+          particles.push(new Particle(mouseX, mouseY));
+        }
+      }
+
+    if (fading && alphaDirection === 1) {
+    let currentTime = millis();
+    let elapsedTime = currentTime - fadeStartTime;
+    let progress = elapsedTime / fadeDuration;
+
+    if (progress > 1) {
+      progress = 1;
+     }
+
+    alpha = 255 * progress; // Fade in to full opacity
+
+    if (elapsedTime >= fadeDuration) {
+      fading = false; // Stop fading after duration
+     }
+    }
+    
+      if (showText) {
+        textFont('Arial');
+        textStyle(ITALIC);      
+        fill(255,0,0, alpha);
+        textSize(15);
+        textAlign(CENTER, CENTER);
+        text('Human and Technology', x1, y1);
+        textStyle(BOLD);
+      }
+
+      if (showText1) {
+        textFont('Arial');
+        textStyle(ITALIC);      
+        fill(255,0,0, alpha);
+        textSize(15);
+        textAlign(CENTER, CENTER);
+        text('Nature and Computers', x2, y2);
+        textStyle(BOLD);
+      }
+
+      if (showText2) {
+        textFont('Arial');
+        textStyle(ITALIC);      
+        fill(255,0,0, alpha);
+        textSize(15);
+        textAlign(CENTER, CENTER);
+        text('Connection', x3, y3);
+        textStyle(BOLD);
+      }
+
+      // Draw the line if both pieces of text are visible
+      if (showText && showText1) {
+        stroke(255, 0, 0, alpha);
+        strokeWeight(1.5);
+        line(x1+10, y1+10, x2+10, y2+10);
+      }
+      if (showText1 && showText2) {
+        stroke(255, 0, 0, alpha);
+        strokeWeight(1.5);
+        line(x2+10, y2+10, x3+10, y3+10);
+      }
+      if (showText && showText2) {
+        stroke(255, 0, 0, alpha);
+        strokeWeight(1.5);
+        line(x1+10, y1+10, x3+10, y3+10);
+      }
+    }
+
+function randomizeTextPositions() {
+  do {
+    x1 = random(width);
+    y1 = random(height);
+  } while (x1 === prevX1 && y1 === prevY1);  // Ensure new x1, y1 is different from previous
+
+  do {
+    x2 = random(width);
+    y2 = random(height);
+  } while (x2 === prevX2 && y2 === prevY2);  // Ensure new x2, y2 is different from previous
+
+  do {
+    x3 = random(width);
+    y3 = random(height);
+  } while (x3 === prevX3 && y3 === prevY3); 
+
+  // Store the current positions as previous for the next check
+  prevX1 = x1;
+  prevY1 = y1;
+  prevX2 = x2;
+  prevY2 = y2;
+  prevX3 = x3;
+  prevY3 = y3;
+}
+
+    function keyPressed() {
+      const container = select('#text-container'); // Select the container
+
+      if (key === ' ') {
+        // Toggle red color for the word "not"
+       /*  const notWord = words.find(word => word.html().trim() === 'not');
+       if (notWord) {
+          if (notWord.hasClass('white')) {
+            notWord.removeClass('white');
+          } else {
+            notWord.addClass('white');
+          }
+        } */
+        // Enter fullscreen mode
+        if (!isFullscreen) {
+          container.style('width', '100vw');
+          container.style('height', '100vh');
+          container.style('top', '0');
+          container.style('left', '0');
+          container.style('transform', 'none');
+          container.style('overflow', 'hidden'); 
+          container.style('mix-blend-mode', 'normal');
+          randomizeWordPositions(); 
+          randomizeTextPositions();
+          isFullscreen = true;
+          showText = true;
+          showText1 = true;
+          showText2 = true;
+          startFadingIn();
+
+        } else {
+          // Exit fullscreen mode
+          container.style('width', '20vw');
+          container.style('height', '20vw');
+          container.style('top', '50%');
+          container.style('left', '23%');
+          container.style('transform', 'translate(-50%, -50%)');
+          container.style('overflow', 'hidden');
+          container.style('mix-blend-mode', 'normal');
+          restoreOriginalLayout();
+          isFullscreen = false;
+          randomizeTextPositions();
+          showText = true;
+          showText1 = true;
+          showText2 = true;
+          startFadingIn();
+        }
+      }
+      if (key === 'm') {
+        // Redirect to another page
+        window.location.href = 'text.html';
+      }
+    }
+    function randomizeWordPositions() {
+      for (let word of words) {
+        const x = random(windowWidth - word.elt.offsetWidth);
+        const y = random(windowHeight - word.elt.offsetHeight);
+        word.style('transform', `translate(${x}px, ${y}px)`);
+      }
+    }
+
+    function restoreOriginalLayout() {
+      const container = select('#text-container'); // Select the container
+
+      // Ensure the container is in its original size and position
+      container.style('width', '20vw');
+      container.style('height', '20vw');
+      container.style('top', '50%');
+      container.style('left', '23%');
+      container.style('transform', 'translate(-50%, -50%)');
+      container.style('overflow', 'visible'); // Restore overflow to visible
+
+      // Start the smooth transition
+      setTimeout(() => {
+        let x = 20;
+        let y = 0; // Start from top of container
+        for (let pos of originalPositions) {
+          const wordWidth = pos.span.elt.offsetWidth;
+          const containerWidth = container.elt.clientWidth;
+
+          if (x + wordWidth > containerWidth) {
+            x = 20; // Reset x position
+            y += pos.span.elt.offsetHeight; // Move to next line
+          }
+
+          pos.span.style('transform', `translate(${x}px, ${y}px)`);
+          x += wordWidth + 10; // Update x position for next word
+        }
+      }, 0); // Ensure that the transition is applied after layout restoration
+    }
+
+
+  
+    //-------------------------------------------
+</script>
+
+<!--div>
+  <a href="text.html"><img src="img/button.png" id="button_white"></a>
+  <img src="img/button-red.png" id="button_red">
+</div-->
+
+<h2>press Space</h2>
+<img src="img/TDMovieOut-0.gif" id="human">
+
+<div class="bar-word">
+  <img src="img/bar.png" id="bar">
+  <h1 id="key">Key Board</h1>
+  <img src="img/bar-red.png" id="barred">
+</div>
+
+<img src="img/frontpage.png" id="macquarium">
+</body>
+</html>
